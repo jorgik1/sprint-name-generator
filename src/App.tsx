@@ -25,16 +25,16 @@ export default function App() {
 
     return (
         <Grid direction="column" justifyContent="center" alignItems="center" container spacing={0} style={{minHeight: '100vh'}}>
-            <Grid item p={2}>
+            <Grid item p={4}>
                 <Typography variant="h4" align="center">
                     Sprint Name Generator
                 </Typography>
             </Grid>
-            <Grid item p={2}>
+            <Grid item p={4}>
                 <Button variant='contained' onClick={handleGenerate}>Generate</Button>
             </Grid>
             <Grid item>
-                <Typography variant="h3" align="center">
+                <Typography variant="h4" align="center">
                     <Result text={sprintName}/>
                 </Typography>
             </Grid>
