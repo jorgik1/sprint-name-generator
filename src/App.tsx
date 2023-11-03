@@ -2,28 +2,31 @@ import React, {useState, useEffect} from 'react'
 import Result from './components/Result';
 import {adjectives} from './words/adjectives'
 import {nouns} from './words/nouns'
-import {Grid, Button, Typography, TextField} from "@mui/material";
+import {Grid, Typography } from "@mui/material";
 import { OpenAI } from "openai";
+import {useLocalStorage} from './hooks';
+import ButtonComponent from './components/Button';
+import TextFieldComponent from './components/TextField';
+import TypographyComponent from './components/TypographyComponent';
+
 
 export default function App() {
 
     const [adjectivesList, setAdjectivesList] = useState<string[]>([]);
     const [nounsList, setNounsList] = useState<string[]>([]);
     const [sprintName, setSprintName] = useState<string>("");
-    const [openAIKey, setOpenAIKey] = useState<string>("");
+    const [openAIKey, setOpenAIKey] = useLocalStorage('openAIKey', "");
+    const [clickedGenerateAI, setClickedGenerateAI] = useState<boolean>(false);
 
     useEffect(() => {
         setAdjectivesList(adjectives);
         setNounsList(nouns);
-
-        // Get the OpenAI key from local storage if it exists
         const storedKey = window.localStorage.getItem('openAIKey');
         if (storedKey !== null) {
             setOpenAIKey(storedKey);
         }
     }, [])
 
-    // Update the OpenAI key in the state and local storage
     const updateOpenAIKey = (event: React.ChangeEvent<HTMLInputElement>) => {
         setOpenAIKey(event.target.value);
         window.localStorage.setItem('openAIKey', event.target.value);
@@ -32,11 +35,14 @@ export default function App() {
     const handleGenerate = () => {
         const selectedAdjIndex = Math.floor(Math.random() * adjectivesList.length)
         const selectedNounIndex = Math.floor(Math.random() * nounsList.length)
-
         setSprintName(`${adjectivesList[selectedAdjIndex]} ${nounsList[selectedNounIndex]}`)
     }
 
     const handleGenerateAI = async () => {
+        setClickedGenerateAI(true);
+        if (!openAIKey) {
+            return;
+        }
         const openai = new OpenAI({
             'apiKey': openAIKey,
             dangerouslyAllowBrowser: true
@@ -65,20 +71,25 @@ export default function App() {
             </Typography>
         </Grid>
         <Grid item p={4}>
-            <TextField label="OpenAI Key" value={openAIKey} onChange={updateOpenAIKey} fullWidth />
+            <TextFieldComponent value={openAIKey} 
+                onChange={updateOpenAIKey} 
+                error={clickedGenerateAI && !openAIKey} 
+                helperText={clickedGenerateAI && !openAIKey ? 'Please enter your OpenAI Key.' : ''}
+            />
+
         </Grid>
         <Grid container item p={2} justifyContent="space-between">
         <Grid item xs={12} sm={5}>
-            <Button variant="contained" onClick={handleGenerate} fullWidth style={{margin: '10px'}}>Generate</Button>
+            <ButtonComponent onClick={handleGenerate}>Generate</ButtonComponent>
         </Grid>
         <Grid item xs={12} sm={5}>
-            <Button variant="contained" onClick={handleGenerateAI} fullWidth style={{margin: '10px'}}>Generate with AI</Button>
+            <ButtonComponent onClick={handleGenerateAI}>Generate with AI</ButtonComponent>
         </Grid>
         </Grid>
         <Grid item>
-            <Typography variant="h4" align="center">
+            <TypographyComponent variant="h4" align="center">
                 <Result text={sprintName}/>
-            </Typography>
+            </TypographyComponent>
         </Grid>
     </Grid>
     );
